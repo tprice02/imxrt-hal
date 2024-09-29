@@ -1069,6 +1069,24 @@ mod tests {
     }
 
     #[test]
+    fn non_default_sbr_baud() {
+        // Assume the 24MHz XTAL clock.
+        const UART_CLOCK_HZ: u32 = 24_000_000;
+        // The best baud rate we can get is
+        const EXPECTED_BAUD: u32 = 9600;
+        // for a target baud of
+        const TARGET_BAUD: u32 = 9600;
+
+        const BAUD: Baud = Baud::compute(UART_CLOCK_HZ, TARGET_BAUD);
+
+        assert_eq!(BAUD.value(UART_CLOCK_HZ), EXPECTED_BAUD);
+
+        assert_eq!(BAUD.osr, 10, "OSR: {}", BAUD.osr);
+        assert_eq!(BAUD.sbr, 250, "SBR: {}", BAUD.sbr);
+        assert!(!BAUD.bothedge);
+    }
+
+    #[test]
     fn read_data_flags() {
         let read_data = ReadData(1 << 15 | 1 << 13);
         let flags = read_data.flags();
